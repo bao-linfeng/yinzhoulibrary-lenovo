@@ -120,7 +120,7 @@ const handleCurrentChange = (data) => {
 const dataRow = ref('');
 const isShow = ref('');
 const handleClose = (data) => {
-  // console.log(data);
+  console.log(data);
   if(data){
     handleSearch();
   }
