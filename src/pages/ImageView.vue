@@ -276,7 +276,7 @@ onMounted(() => {
 <template>
   <section class="image-view-wrap">
     <aside class="aside" v-if="isText == 1">
-      <h3 class="title">目录</h3>
+      <h3 class="title PingFang_Regular">目录</h3>
       <ul class="analysis-wrap style1">
         <li class="analysis-box" :class="{active: analysis === item.title}" v-for="(item, index) in analysisList" :key="index">
           <p :class="{active: analysis === item.title}" @click="handleClickAnalysis(item)">{{item.title}}</p>
@@ -328,7 +328,7 @@ onMounted(() => {
       <!-- 分页 -->
       <footer class="footer">
         <p class="marginR20">{{page}}/{{total}} 跳转至</p>
-        <el-input class="w150" v-model="currentPage" @change="handleInputChange"  />
+        <el-input class="w150 input-center" v-model="currentPage" @change="handleInputChange"  />
       </footer>
     </section>
   </section>
@@ -356,7 +356,6 @@ onMounted(() => {
       border-bottom: 2px solid #c9a470;
       font-size: 32px;
       color: #7C4F11;
-      font-family: 'kaiti';
     }
     .analysis-wrap{
       height: calc(100% - 80px);
@@ -551,7 +550,9 @@ onMounted(() => {
     display: flex;
     justify-content: center;
     align-items: center;
-
+    .center{
+      text-align: center;
+    }
   }
 }
 </style>

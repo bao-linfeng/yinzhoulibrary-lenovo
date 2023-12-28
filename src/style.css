@@ -25,12 +25,22 @@ ul{
 i{
   font-style: normal;
 }
+/* 字体引入 */
+@font-face {
+  font-family: 'SourceHanSerifCN-Regular';
+  src: url('/SourceHanSerifCN-Regular.otf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+.SourceHanSerifCN-Regular{
+  font-family: 'SourceHanSerifCN-Regular';
+}
+/* #app */
 #app {
   position: relative;
   width: 100%;
   height: 100%;
   display: flex;
-  /* overflow: hidden; */
 }
 .marginL10{
   margin-left: 10px;
@@ -40,6 +50,9 @@ i{
 }
 .marginR20{
   margin-right: 20px;
+}
+.marginL5{
+  margin-left: 5px;
 }
 .marginT10{
   margin-top: 10px;
@@ -146,4 +159,8 @@ i{
 /* zoomcharts */
 .DVSL-font-height{
   display: none !important;
+}
+
+.input-center .el-input__inner{
+  text-align: center;
 }

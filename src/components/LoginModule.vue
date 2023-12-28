@@ -56,7 +56,7 @@ const setPassword = async () => {
   }
 };
 
-const form = ref({'account': 'admin_yinzhoulibrary00001', 'password': 'nbyz@)@#'});
+const form = ref({'account': '', 'password': ''});
 
 const handleLogin = () => {
     if(!form.value.account){

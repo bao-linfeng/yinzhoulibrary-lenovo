@@ -109,6 +109,9 @@ const handleClickAction = (row, t) => {
       window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1)+'&content='+SearchParameters.value.content+'&isText=1');
       // router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
     }
+    if(t === 'tree'){
+      window.open('/Relationmap?id='+row._key);
+    }
 }
 
 const handleCurrentChange = (data) => {
@@ -201,7 +204,7 @@ onMounted(() => {
           <li :class="{active: tab === item.value}" v-for="(item, index) in tabList" :key="index" @click="tab = item.value">
             <img v-if="index === 0" src="../assets/列表.svg" />
             <img v-if="index === 1" src="../assets/图库.svg" />
-            <i>{{item.label}}</i>
+            <i class="marginL5">{{item.label}}</i>
           </li>
         </ul>
       </section>
@@ -280,6 +283,7 @@ onMounted(() => {
                 <button class="btn" @click="handleClickAction(scope.row, 'look')">查看</button>
                 <button class="btn" v-if="scope.row.hasImage == 1" @click="handleClickAction(scope.row, 'image')">影像</button>
                 <button class="btn" v-if="scope.row.hasIndex == 1" @click="handleClickAction(scope.row, 'text')">全文</button>
+                <button class="btn" v-if="scope.row.hasTree == 1" @click="handleClickAction(scope.row, 'tree')">节点</button>
               </template>
             </el-table-column>
           </el-table>
@@ -332,7 +336,7 @@ onMounted(() => {
       width: 1400px;
       margin: 0 auto;
       padding: 30px;
-      background: #f8f8f8 url('../assets/Rectangle.png') 50% 50% no-repeat;
+      background: rgba(248, 248, 248, 0.75) url('../assets/Rectangle.png') 50% 50% no-repeat;
       background-size: cover;
       .search-box{
         display: flex;
@@ -348,7 +352,6 @@ onMounted(() => {
       width: 1460px;
       margin: 30px auto 10px auto;
       color: #7C4F11;
-      font-family: 'kaiti';
       font-size: 26px;
       .left{
         display: flex;
@@ -363,7 +366,7 @@ onMounted(() => {
         align-items: center;
         li{
           cursor: pointer;
-          margin-left: 20px;
+          margin-left: 40px;
           opacity: 0.5;
           &.active{
             opacity: 1;
@@ -514,6 +517,7 @@ onMounted(() => {
       line-height: 14px;
       font-size: 12px;
       color: #fff;
+      letter-spacing: 3px;
     }
     .detail{
       position: absolute;
@@ -529,6 +533,7 @@ onMounted(() => {
         white-space: nowrap;
         text-overflow: ellipsis;
         margin-bottom: 5px;
+        letter-spacing: 2px;
       }
     }
   }

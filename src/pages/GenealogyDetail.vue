@@ -125,9 +125,9 @@ onMounted(() => {
     padding: 30px;
     width: 1400px;
     height: 694px;
-    background: url('../assets/eave.png') 0 0 repeat-x;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 10px 0 #fffcf9;
+    background: rgba(255, 255, 255, 0.7) url('../assets/eave.png') 0 0 repeat-x;
+    // backdrop-filter: blur(10px);
+    // box-shadow: 0 0 10px 0 #fffcf9;
     >.title{
       width: 250px;
       height: 40px;
@@ -137,7 +137,6 @@ onMounted(() => {
       font-weight: normal;
       background: url('../assets/tleft.svg') 0 50% no-repeat, url('../assets/tright.svg') 100% 50% no-repeat; 
       margin: 40px 0 30px 0;
-      font-family: 'kaiti';
     }
     .main-section{
       display: flex;
@@ -155,7 +154,6 @@ onMounted(() => {
           font-size: 18px;
           font-style: normal;
           overflow: hidden;
-          font-family: 'kaiti';
         }
       }
       .article{
@@ -169,7 +167,6 @@ onMounted(() => {
           .title{
             font-size: 40px;
             margin-right: 40px;
-            font-family: 'kaiti';
           }
           .place{
             cursor: pointer;

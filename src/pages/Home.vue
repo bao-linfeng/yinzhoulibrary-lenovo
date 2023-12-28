@@ -68,13 +68,12 @@ const goRouter = () => {
         outline: none;
         border: none;
         font-family: "楷体";
+        text-align: center;
       }
     }
   }
 }
 ::-webkit-input-placeholder {
   color: #192B53; 
-  font-family: "楷体";
-  text-align: center;
 }
 </style>
