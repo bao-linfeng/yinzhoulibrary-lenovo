@@ -305,7 +305,7 @@ onMounted(() => {
         <div class="large-image" :class="{active: isText != 1}">
           <div class="large-box">
             <img class="image" :src="imageDetail" />
-            <p class="text" :class="{active: textAll === item.index}" :style="{top: item.top, left: item.left, fontSize: item.fontSize}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item.index">{{item.content}}</p>
+            <p class="text" :class="{active: textAll === item.index}" :title="item.content" :style="{top: item.top, left: item.left, fontSize: item.fontSize}" v-for="(item, index) in textAllList" :key="index" @click="textAll = item.index">{{item.content}}</p>
           </div>
         </div>
         <!-- 全文 -->

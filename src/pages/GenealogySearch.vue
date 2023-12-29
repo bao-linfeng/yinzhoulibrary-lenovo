@@ -88,20 +88,21 @@ const tabList = ref([
 
 const isShow = ref(true);
 
+SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
+
 const [tableData, refresh, loading, pagination] = useTable(catalog.searchGCFrontEnd, SearchParameters.value,
   {
     path: {
-        data: 'data',
-        total: 'total',
-        page: 'page',
-        size: 'limit'
+      data: 'data',
+      total: 'total',
+      page: 'page',
+      size: 'limit',
     },
     immediate: true
   });
 
 onMounted(() => {
   h.value = 1100;
-  SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
   GCResolverFrontEnd();
 });
 
@@ -194,7 +195,7 @@ onMounted(() => {
           </el-table>
           <!-- 图库 -->
           <section v-else class="catalog-wrap style1">
-            <div class="catalog-box" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
+            <div class="catalog-box" :class="{active: !isShow}" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
               <i class="book">{{item.genealogyName}}</i>
               <div class="detail">
                 <h3 :title="item.genealogyName">{{item.genealogyName}}</h3>
@@ -345,6 +346,9 @@ onMounted(() => {
     background: url('../assets/book.png') 50% 50% no-repeat;
     background-size: cover;
     cursor: pointer;
+    &.active{
+      margin: 20px 33px 0 33px;
+    }
     .book{
       position: absolute;
       top: 55px;

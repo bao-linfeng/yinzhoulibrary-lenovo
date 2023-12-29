@@ -2,7 +2,7 @@ import { reactive } from "vue";
 
 export function usePagination(
   cb,
-  sizeOption = [20, 50, 100, 200]
+  sizeOption = [12, 50, 100, 200]
 ){
     const pagination = reactive({
         current: 1,
