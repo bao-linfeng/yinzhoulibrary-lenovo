@@ -7,43 +7,16 @@ import { catalog } from '../util/api';
 import { ElLoading } from 'element-plus';
 import { getQueryVariable, createMsg } from '../util/ADS';
 import HeaderModule from '../components/HeaderModule.vue';
+import ScrollModule from '../components/ScrollModule.vue';
+import StatisticsModule from '../components/StatisticsModule.vue';
 import showIcon from '../assets/展开.svg';
 import hideIcon from '../assets/收起.svg';
+import { useTable } from '../composables/useTable.js';
 
 const router = useRouter();
 const global = useGlobalStore();
 const { userInfo, pathActive, orgMemberInfo, token } = storeToRefs(global);
 const { saveProperyValue } = global;
-
-const getDataList = async () => {
-  const loading = ElLoading.service({
-    lock: true,
-    text: 'Loading',
-    background: 'rgba(0, 0, 0, 0.7)',
-  });
-  tableData.value = [];
-  const result = await catalog.searchGCFrontEnd({
-    'gcKey': SearchParameters.value.gcKey,
-    'genealogyName': SearchParameters.value.genealogyName,
-    'surname': SearchParameters.value.surname,
-    'hall': SearchParameters.value.hall,
-    'publish': SearchParameters.value.publish,
-    'authors': SearchParameters.value.authors,
-    'place': SearchParameters.value.place,
-    'content': SearchParameters.value.content,
-    'hasImage': SearchParameters.value.hasImage,
-    'hasIndex': SearchParameters.value.hasIndex,
-    'page': page.value,
-    'limit': limit.value,
-  });
-  loading.close();
-  if(result.status == 200){
-    tableData.value = result.result.list;
-    total.value = result.result.total;
-  }else{
-    createMsg(result.msg);
-  }
-};
 
 const GCResolverFrontEnd = async () => {
   const loading = ElLoading.service({
@@ -51,28 +24,21 @@ const GCResolverFrontEnd = async () => {
     text: 'Loading',
     background: 'rgba(0, 0, 0, 0.7)',
   });
-  const result = await catalog.GCResolverFrontEnd({
-    'gcKey': SearchParameters.value.gcKey,
-    'genealogyName': SearchParameters.value.genealogyName,
-    'surname': SearchParameters.value.surname,
-    'hall': SearchParameters.value.hall,
-    'publish': SearchParameters.value.publish,
-    'authors': SearchParameters.value.authors,
-    'place': SearchParameters.value.place,
-    'content': SearchParameters.value.content,
-    'hasImage': SearchParameters.value.hasImage,
-    'hasIndex': SearchParameters.value.hasIndex,
-  });
+  const result = await catalog.GCResolverFrontEnd(SearchParameters.value);
   loading.close();
   if(result.status == 200){
-    listAuthors.value = result.data.listAuthors;
-    listHall.value = result.data.listHall;
-    listPlace.value = result.data.listPlace;
-    listSurname.value = result.data.listSurname;
+    statisticsData.value = result.data;
   }else{
     createMsg(result.msg);
   }
 };
+
+const statisticsData = ref({
+  'listAuthors': [],
+  'listHall': [],
+  'listPlace': [],
+  'listSurname': [],
+});
 
 const SearchParameters = ref({
   'gcKey': '',
@@ -86,37 +52,32 @@ const SearchParameters = ref({
   'hasImage': '',
   'hasIndex': '',
 });
-const page = ref(1);
-const limit = ref(12);
-const total = ref(0);
-const tableData = ref([]);
 const h = ref(200);
+
 const handleSearch = () => {
-    page.value = 1;
-    getDataList();
-    GCResolverFrontEnd();
+  pagination.reset();
+  refresh(SearchParameters.value);
+  GCResolverFrontEnd();
+}
+
+const handleChangeStatistics = (data) => {
+  SearchParameters.value[data.p] = data.v;
+  handleSearch();
 }
 
 const handleClickAction = (row, t) => {
-    if(t === 'look'){
-        router.push('/GenealogyDetail?id='+row._key);
-    }
-    if(t === 'image'){
-      window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1));
-      // router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1');
-    }
-    if(t === 'text'){
-      window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1)+'&content='+SearchParameters.value.content+'&isText=1');
-      // router.push('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page=1&isText=1');
-    }
-    if(t === 'tree'){
-      window.open('/Relationmap?id='+row._key);
-    }
-}
-
-const handleCurrentChange = (data) => {
-    page.value = data;
-    getDataList();
+  if(t === 'look'){
+      router.push('/GenealogyDetail?id='+row._key);
+  }
+  if(t === 'image'){
+    window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1));
+  }
+  if(t === 'text'){
+    window.open('/ImageView?id='+row._key+'&genealogyName='+row.genealogyName+'&volumeKey='+row.firstVolumeKey+'&page='+(row.indexImagePage + 1)+'&content='+SearchParameters.value.content+'&isText=1');
+  }
+  if(t === 'tree'){
+    window.open('/Relationmap?id='+row._key);
+  }
 }
 
 const tab = ref(0);
@@ -125,37 +86,23 @@ const tabList = ref([
   {'label': '图列', 'value': 1},
 ]);
 
+const isShow = ref(true);
 
-const listSurname = ref([]);
-const listPlace = ref([]);
-const listHall = ref([]);
-const listAuthors = ref([]);
-const statisticsToggle = ref([false, false, false, false, true]);
-const changeProperty = (p, v) =>{
-  console.log(p, v);
-  if(SearchParameters.value[p] === v){
-    SearchParameters.value[p] = '';
-  }else{
-    SearchParameters.value[p] = v;
-  }
-  
-  handleSearch();
-}
-
-const handleToggle = (i) => {
-  statisticsToggle.value = statisticsToggle.value.map((ele, index) => {
-    if(i === index){
-      ele = !ele;
-    }
-
-    return ele;
+const [tableData, refresh, loading, pagination] = useTable(catalog.searchGCFrontEnd, SearchParameters.value,
+  {
+    path: {
+        data: 'data',
+        total: 'total',
+        page: 'page',
+        size: 'limit'
+    },
+    immediate: true
   });
-}
 
 onMounted(() => {
   h.value = 1100;
   SearchParameters.value.surname = getQueryVariable('surname') ? decodeURIComponent(getQueryVariable('surname')) : '';
-  handleSearch();
+  GCResolverFrontEnd();
 });
 
 </script>
@@ -194,10 +141,10 @@ onMounted(() => {
       <!-- tab -->
       <section class="tab-section">
         <div class="left">
-          <h3 class="title">发现 {{total}} 部家谱</h3>
-          <div class="toggle-box" @click="handleToggle(4)">
+          <h3 class="title">发现 {{pagination.total}} 部家谱</h3>
+          <div class="toggle-box" @click="isShow = !isShow">
             <img src="../assets/收起.svg" />
-            <i>{{statisticsToggle[4] ? '收起' : '展开'}}筛选</i>
+            <i>{{isShow ? '收起' : '展开'}}筛选</i>
           </div>
         </div>
         <ul class="tab-ul">
@@ -211,56 +158,14 @@ onMounted(() => {
       <!-- data -->
       <section class="data-section">
         <!-- 分面器 -->
-        <aside class="aside" v-show="statisticsToggle[4]">
-          <div class="scroll-wrap">
-              <img class="left" src="../assets/scrollLeft.png" alt="">
-              <img class="right" src="../assets/scrollRight.png" alt="">
-          </div>
-          <div class="statistics">
-            <div class="box">
-              <div class="title-box">
-                <h3 class="title">姓氏</h3>
-                <img :src="!statisticsToggle[0] ? showIcon : hideIcon" @click="handleToggle(0)" />
-              </div>
-              <ul class="list-wrap style1" :class="{active: statisticsToggle[0]}">
-                  <li class="li" :class="{active: SearchParameters.surname == item.surname}" v-for="(item, index) in listSurname" :key="index" @click="changeProperty('surname', item.surname)">{{item.surname}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <div class="title-box">
-                <h3 class="title">堂号</h3>
-                <img :src="!statisticsToggle[1] ? showIcon : hideIcon" @click="handleToggle(1)" />
-              </div>
-              <ul class="list-wrap style1" :class="{active: statisticsToggle[1]}">
-                  <li class="li" :class="{active: SearchParameters.hall == item.hall}" v-for="(item, index) in listHall" :key="index" @click="changeProperty('hall', item.hall)">{{item.hall}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <div class="title-box">
-                <h3 class="title">作者</h3>
-                <img :src="!statisticsToggle[2] ? showIcon : hideIcon" @click="handleToggle(2)" />
-              </div>
-              <ul class="list-wrap style1" :class="{active: statisticsToggle[2]}">
-                  <li class="li" :class="{active: SearchParameters.authors == item.authors}" v-for="(item, index) in listAuthors" :key="index" @click="changeProperty('authors', item.authors)">{{item.authors}}({{item.length}})</li>
-              </ul>
-            </div>
-            <div class="box">
-              <div class="title-box">
-                <h3 class="title">谱籍地</h3>
-                <img :src="!statisticsToggle[3] ? showIcon : hideIcon" @click="handleToggle(3)" />
-              </div>
-              <ul class="list-wrap style1" :class="{active: statisticsToggle[3]}">
-                  <li class="li" :class="{active: SearchParameters.place == item.place}" v-for="(item, index) in listPlace" :key="index" @click="changeProperty('place', item.place)">{{item.place}}({{item.length}})</li>
-              </ul>
-            </div>
-          </div>
+        <aside class="aside" v-show="isShow">
+          <ScrollModule />
+          <StatisticsModule :statisticsData="statisticsData" v-on:save="handleChangeStatistics" />
         </aside>
         <!-- 谱目列表 -->
-        <article class="article" :class="{active: !statisticsToggle[4]}">
-          <div class="scroll-wrap">
-              <img class="left" src="../assets/scrollLeft.png" alt="">
-              <img class="right" src="../assets/scrollRight.png" alt="">
-          </div>
+        <article class="article" :class="{active: !isShow}">
+          <ScrollModule />
+          <!-- 列表 -->
           <el-table 
             v-if="tab === 0"
             ref="jiapu"
@@ -268,7 +173,7 @@ onMounted(() => {
             :height="h"
             style="width: 100%">
             <el-table-column prop="_key" label="谱ID" width="120" align="center" />
-            <el-table-column prop="genealogyName" label="谱名" min-width="120" align="center" />
+            <el-table-column prop="genealogyName" label="谱名" width="150" align="center" />
             <el-table-column prop="surname" label="姓氏" width="120" align="center" />
             <el-table-column prop="volume" label="总卷数" width="120" align="center" />
             <el-table-column prop="hasVolume" label="实拍卷数" width="120" align="center" />
@@ -287,7 +192,7 @@ onMounted(() => {
               </template>
             </el-table-column>
           </el-table>
-          <!-- box -->
+          <!-- 图库 -->
           <section v-else class="catalog-wrap style1">
             <div class="catalog-box" @click="handleClickAction(item, 'look')" v-for="(item, index) in tableData" :key="index">
               <i class="book">{{item.genealogyName}}</i>
@@ -302,15 +207,16 @@ onMounted(() => {
             <el-pagination
               background
               layout="prev, pager, next, jumper, total"
-              :current-page="page"
-              :page-size="limit"
-              :total="total"
-              @current-change="handleCurrentChange"
+              :current-page="pagination.current"
+              :page-size="pagination.size"
+              :total="pagination.total"
+              @current-change="pagination.onPageChange"
             />
           </div>
         </article>
       </section>
     </main>
+    <!-- footer -->
     <footer class="footer">
       <img class="logo" src="../assets/logo.png" />
     </footer>
@@ -391,7 +297,7 @@ onMounted(() => {
         background-color: #fff;
         margin-left: 20px;
         &.active{
-          width: 100%;
+          width: calc(100% - 40px);
           margin-left: 0;
         }
         .btn{
@@ -420,74 +326,6 @@ onMounted(() => {
     align-items: center;
     .logo{
       height: 36px;
-    }
-  }
-}
-// 卷轴
-.scroll-wrap{
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 25px;
-  background: url('../assets/scroll.png') 0 0 repeat-x;
-  &.active{
-    left: 11px;
-    width: calc(100% - 22px);
-  }
-  .left{
-    position: absolute;
-    left: -11px;
-    top: 0;
-  }
-  .right{
-    position: absolute;
-    right: -11px;
-    top: 0;
-  }
-}
-// 分面器
-.statistics{
-  position: relative;
-  height: calc(100% - 45px);
-  padding: 20px;
-  font-size: 16px;
-  .box{
-    height: 260px;
-    margin-top: 20px;
-    .title-box{
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-      img{
-        cursor: pointer;
-        height: 14px;
-      }
-    }
-  }
-  .title{
-    border-left: 3px solid #333;
-    padding-left: 10px;
-    height: 14px;
-    line-height: 14px;
-    font-size: 16px;
-    font-weight: normal;
-  }
-  .list-wrap{
-    height: calc(100% - 34px);
-    overflow-y: hidden;
-    &.active{
-      overflow-y: auto;
-    }
-    .li{
-      text-indent: 14px;
-      margin-bottom: 5px;
-      cursor: pointer;
-      color: #999;
-      &.active{
-        color: #358acd;
-      }
     }
   }
 }
